@@ -43,6 +43,10 @@ type Uploader struct {
 	thumbnailSize int
 }
 
+func NewUploader(adapter *weed.Adapter, maxSize, thumbnailSize int) *Uploader {
+	return &Uploader{adapter, maxSize, thumbnailSize}
+}
+
 func (uploader *Uploader) upload(image *magick.Image, format string) (string, string, int64, error) {
 	encodeReader, encodeWriter := io.Pipe()
 	go func() {
@@ -92,7 +96,7 @@ func (uploader *Uploader) Upload(length int64, f io.Reader, progress chan float3
 			failed = true
 			return
 		}
-		*photo = File{Fid: fid, Time: time.Now(), Type: format, Size: size}
+		*photo = File{Fid: fid, Time: time.Now(), Type: format, Size: size, Url: purl}
 	}
 
 	// resize image and upload to weedfs
