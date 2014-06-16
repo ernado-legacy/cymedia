@@ -1,8 +1,6 @@
 package cymedia
 
-import (
-	"io"
-)
+import "io"
 
 type Progressor struct {
 	Length   int64
@@ -28,8 +26,7 @@ func (p *Progressor) Start() {
 
 func Progress(f io.Reader, length int64, rate int64, progress chan float32) io.Reader {
 	progressReader, progressWriter := io.Pipe()
-	reader := io.TeeReader(f, progressWriter)
 	p := Progressor{length, rate, progressReader, progress}
 	go p.Start()
-	return reader
+	return io.TeeReader(f, progressWriter)
 }
