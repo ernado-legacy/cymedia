@@ -57,8 +57,8 @@ func (uploader *Uploader) upload(image *magick.Image, format string) (string, st
 }
 
 func (uploader *Uploader) Upload(length int64, f io.Reader, progress chan float32) (*Photo, error) {
-	progressWriter := cymedia.Progress(length, 10, progress)
-	im, err := magick.Decode(io.TeeReader(f, progressWriter))
+	reader := cymedia.Progress(f, length, 10, progress)
+	im, err := magick.Decode(reader)
 	if err != nil {
 		return nil, err
 	}
