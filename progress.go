@@ -17,7 +17,7 @@ func (p *Progressor) Start() {
 		read, err := p.Reader.Read(buffer)
 		total += int64(read)
 		p.Progress <- float32(total) / float32(p.Length) * 100
-		if err != nil || total == p.Length {
+		if err != nil || total >= p.Length {
 			break
 		}
 	}
