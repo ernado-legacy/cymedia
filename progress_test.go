@@ -9,7 +9,7 @@ import (
 func TestProgress(t *testing.T) {
 	Convey("Progress", t, func() {
 		var length int64
-		length = 1024 * 1024
+		length = 10 * 1024
 		buffer := make([]byte, length)
 		bufferReader := bytes.NewReader(buffer)
 		progress := make(chan float32, 4)
@@ -22,10 +22,11 @@ func TestProgress(t *testing.T) {
 		}()
 		progressShould := float64(0.0)
 		precision := 0.01
-		for p := range progress {
+		var p float32
+		for p = range progress {
 			So(p, ShouldBeBetween, progressShould-precision*step, progressShould+precision*step)
 			progressShould += step
 		}
-		So(true, ShouldBeTrue)
+		So(p, ShouldAlmostEqual, 100.0)
 	})
 }

@@ -125,6 +125,10 @@ func (uploader *Uploader) Upload(length int64, f io.Reader, progress chan float3
 	}()
 	wg.Wait()
 
+	if purlJpeg == "" || purlWebp == "" || thumbPurlJpeg == "" || thumbPurlWebp == "" {
+		return nil, errors.New("async upload failed")
+	}
+
 	if failed {
 		return nil, errors.New("failed")
 	}

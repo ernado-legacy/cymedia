@@ -20,14 +20,11 @@ func (p *Progressor) Start() {
 	for {
 		buffer := make([]byte, bufLen)
 		read, err := p.Reader.Read(buffer)
-		if err == io.EOF {
-			break
-		}
 		total += int64(read)
-		if total == p.Length {
+		p.Progress <- float32(total) / float32(p.Length) * 100
+		if err == io.EOF || total == p.Length {
 			break
 		}
-		p.Progress <- float32(total) / float32(p.Length) * 100
 	}
 	close(p.Progress)
 }
