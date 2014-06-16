@@ -2,14 +2,14 @@ package cymedia
 
 import "io"
 
-type Progressor struct {
+type progressor struct {
 	Length   int64
 	Rate     int64
 	Reader   *io.PipeReader
 	Progress chan float32
 }
 
-func (p *Progressor) Start() {
+func (p *progressor) Start() {
 	var total int64
 	buffer := make([]byte, p.Length*1./p.Rate)
 	p.Progress <- float32(0)
@@ -26,7 +26,7 @@ func (p *Progressor) Start() {
 
 func Progress(f io.Reader, length int64, rate int64, progress chan float32) io.Reader {
 	progressReader, progressWriter := io.Pipe()
-	p := Progressor{length, rate, progressReader, progress}
+	p := progressor{length, rate, progressReader, progress}
 	go p.Start()
 	return io.TeeReader(f, progressWriter)
 }
