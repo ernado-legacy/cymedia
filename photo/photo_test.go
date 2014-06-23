@@ -1,7 +1,7 @@
 package photo
 
 import (
-	"github.com/ernado/poputchiki-api/weed"
+	"github.com/ernado/weed"
 	. "github.com/smartystreets/goconvey/convey"
 	"os"
 	"testing"
