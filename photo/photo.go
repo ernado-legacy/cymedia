@@ -7,7 +7,7 @@ import (
 import (
 	"errors"
 	"github.com/ernado/cymedia"
-	"github.com/ernado/poputchiki-api/weed"
+	"github.com/ernado/weed"
 	"github.com/rainycape/magick"
 	"log"
 	"sync"
