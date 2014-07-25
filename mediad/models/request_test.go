@@ -6,6 +6,37 @@ import (
 )
 
 func TestVideoParams(t *testing.T) {
+
+	Convey("Audio optioons", t, func() {
+		Convey("Simple", func() {
+			p := new(AudioOptions)
+			p.Format = "aac"
+			p.Bitrate = 1024 * 128
+			expected := "-strict -2 -c:a aac -b:a 131072 -vn"
+			actual := p.String()
+			So(actual, ShouldEqual, expected)
+		})
+		Convey("Duration", func() {
+			p := new(AudioOptions)
+			p.Format = "aac"
+			p.Bitrate = 1024 * 128
+			p.Start = 5
+			p.Duration = 10
+			expected := "-strict -2 -c:a aac -b:a 131072 -ss 5 -t 10 -vn"
+			actual := p.String()
+			So(actual, ShouldEqual, expected)
+		})
+		Convey("End", func() {
+			p := new(AudioOptions)
+			p.Format = "aac"
+			p.Bitrate = 1024 * 128
+			p.Start = 5
+			p.End = 10
+			expected := "-strict -2 -c:a aac -b:a 131072 -ss 5 -to 10 -vn"
+			actual := p.String()
+			So(actual, ShouldEqual, expected)
+		})
+	})
 	Convey("Video options", t, func() {
 		Convey("Simple", func() {
 			p := new(VideoOptions)
