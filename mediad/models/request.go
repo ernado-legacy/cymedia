@@ -41,14 +41,18 @@ type AudioOptions struct {
 	Bitrate  int    `json:"birtate"`
 }
 
+func fixAAC(params []string) []string {
+	params = append(params, "-strict")
+	return append(params, "-2")
+}
+
 func (v *VideoOptions) String() string {
 	var params []string
 	params = append(params, fmt.Sprintf("-c:v %s", v.Video.Format))
 	params = append(params, fmt.Sprintf("-b:v %d", v.Video.Bitrate))
 
 	if v.Audio.Format == "aac" {
-		params = append(params, "-strict")
-		params = append(params, "-2")
+		params = fixAAC(params)
 	}
 
 	params = append(params, fmt.Sprintf("-c:a %s", v.Audio.Format))
@@ -75,8 +79,7 @@ func (a *AudioOptions) String() string {
 	var params []string
 
 	if a.Format == "aac" {
-		params = append(params, "-strict")
-		params = append(params, "-2")
+		params = fixAAC(params)
 	}
 
 	params = append(params, fmt.Sprintf("-c:a %s", a.Format))
