@@ -6,7 +6,6 @@ import (
 )
 
 func TestVideoParams(t *testing.T) {
-
 	Convey("Audio optioons", t, func() {
 		Convey("Simple", func() {
 			p := new(AudioOptions)
@@ -48,7 +47,6 @@ func TestVideoParams(t *testing.T) {
 			actual := p.String()
 			So(actual, ShouldEqual, expected)
 		})
-
 		Convey("Crop", func() {
 			p := new(VideoOptions)
 			p.Audio.Format = "libvorbis"
