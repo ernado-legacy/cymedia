@@ -2,17 +2,27 @@ package models
 
 import (
 	"fmt"
-	"labix.org/v2/mgo/bson"
 	"strings"
 )
 
+type Options interface {
+	String() string
+	GetFormat() string
+}
+
 type Request struct {
-	Id          bson.ObjectId `json:"id"`
-	File        string        `json:"file"`
-	Type        string        `json:"type"`
-	ProgressKey string        `json:"progress_key"`
-	ResultKey   string        `json:"result_key"`
-	Options     interface{}   `json:"options"`
+	Id          string      `json:"id"`
+	File        string      `json:"file"`
+	Type        string      `json:"type"`
+	ProgressKey string      `json:"progress_key"`
+	ResultKey   string      `json:"result_key"`
+	Options     interface{} `json:"options"`
+}
+
+type Responce struct {
+	Id     string `json:"id"`
+	File   string `json:"file"`
+	Format string `json:"format"`
 }
 
 type VideoOptions struct {
@@ -38,7 +48,8 @@ type AudioOptions struct {
 	End      int    `json:"end"`
 	Duration int    `json:"duration"`
 	Format   string `json:"format"`
-	Bitrate  int    `json:"birtate"`
+
+	Bitrate int `json:"birtate"`
 }
 
 func fixAAC(params []string) []string {
@@ -75,6 +86,10 @@ func (v *VideoOptions) String() string {
 	return strings.Join(params, " ")
 }
 
+func (v *VideoOptions) GetFormat() string {
+	return v.Video.Format
+}
+
 func (a *AudioOptions) String() string {
 	var params []string
 
@@ -99,4 +114,8 @@ func (a *AudioOptions) String() string {
 	params = append(params, "-vn")
 
 	return strings.Join(params, " ")
+}
+
+func (a *AudioOptions) GetFormat() string {
+	return a.Format
 }

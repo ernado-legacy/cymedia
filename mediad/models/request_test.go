@@ -6,7 +6,12 @@ import (
 )
 
 func TestVideoParams(t *testing.T) {
-	Convey("Audio optioons", t, func() {
+	Convey("Audio options", t, func() {
+		Convey("Format", func() {
+			p := new(AudioOptions)
+			p.Format = "aac"
+			So(p.Format, ShouldEqual, p.GetFormat())
+		})
 		Convey("Simple", func() {
 			p := new(AudioOptions)
 			p.Format = "aac"
@@ -37,6 +42,11 @@ func TestVideoParams(t *testing.T) {
 		})
 	})
 	Convey("Video options", t, func() {
+		Convey("Format", func() {
+			p := new(VideoOptions)
+			p.Video.Format = "h264"
+			So(p.GetFormat(), ShouldEqual, p.Video.Format)
+		})
 		Convey("Simple", func() {
 			p := new(VideoOptions)
 			p.Audio.Format = "aac"
