@@ -37,5 +37,10 @@ func TestQuery(t *testing.T) {
 		r, err := q.Pull()
 		So(err, ShouldBeNil)
 		So(r.Id, ShouldEqual, request.Id)
+
+		Convey("Connection error handling", func() {
+			_, err := NewRedisQuery(":1234", randStr(30))
+			So(err, ShouldNotBeNil)
+		})
 	})
 }
