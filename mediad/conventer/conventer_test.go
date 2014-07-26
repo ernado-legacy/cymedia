@@ -1,4 +1,4 @@
-package main
+package conventer
 
 import (
 	"github.com/ernado/cymedia/mediad/models"
@@ -16,7 +16,7 @@ func TestVideoConvertation(t *testing.T) {
 			So(f, ShouldNotBeNil)
 			defer f.Close()
 
-			c := Converter{}
+			c := VideoConventer{}
 			o := new(models.VideoOptions)
 			o.Video.Format = "badformat"
 			o.Audio.Format = "aac"
@@ -32,7 +32,7 @@ func TestVideoConvertation(t *testing.T) {
 			So(f, ShouldNotBeNil)
 			defer f.Close()
 
-			c := Converter{}
+			c := VideoConventer{}
 			o := new(models.VideoOptions)
 			o.Video.Format = "libvpx"
 			o.Audio.Format = "libvo"
@@ -51,7 +51,7 @@ func TestVideoConvertation(t *testing.T) {
 			So(f, ShouldNotBeNil)
 			defer f.Close()
 
-			c := Converter{}
+			c := VideoConventer{}
 			o := new(models.VideoOptions)
 			o.Video.Format = "h264"
 			o.Audio.Format = "aac"
@@ -66,7 +66,7 @@ func TestVideoConvertation(t *testing.T) {
 			So(f, ShouldNotBeNil)
 			defer f.Close()
 
-			c := Converter{}
+			c := VideoConventer{}
 			o := new(models.VideoOptions)
 			o.Video.Format = "libvpx"
 			o.Audio.Format = "libvorbis"
@@ -84,7 +84,7 @@ func TestVideoConvertation(t *testing.T) {
 			So(f, ShouldNotBeNil)
 			defer f.Close()
 
-			c := Converter{}
+			c := VideoConventer{}
 			o := new(models.AudioOptions)
 			o.Format = "aac"
 			o.Bitrate = 128 * 1024
@@ -97,7 +97,7 @@ func TestVideoConvertation(t *testing.T) {
 			So(f, ShouldNotBeNil)
 			defer f.Close()
 
-			c := Converter{}
+			c := VideoConventer{}
 			o := new(models.AudioOptions)
 			o.Format = "libvorbis"
 			o.Bitrate = 128 * 1024

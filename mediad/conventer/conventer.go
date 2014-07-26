@@ -1,4 +1,4 @@
-package main
+package conventer
 
 import (
 	"crypto/rand"
@@ -12,12 +12,14 @@ import (
 	"path/filepath"
 )
 
-type Converter struct {
+type Conventer interface {
+	Convert(input io.Reader, options models.Options) (output io.ReadCloser, err error)
 }
+
+type VideoConventer struct{}
 
 var (
 	ErrBadFormat = errors.New("Bad media format")
-	extensions   = map[string]string{"h264": "mp4", "libvpx": "webm", "libvorbis": "ogg", "aac": "aac"}
 )
 
 const fileNameLength = 12
@@ -28,9 +30,9 @@ func randStr(length int) string {
 	return hex.EncodeToString(b)
 }
 
-func (c *Converter) Convert(input io.Reader, options models.Options) (output io.ReadCloser, err error) {
-	extension, ok := extensions[options.GetFormat()]
-	if !ok {
+func (c *VideoConventer) Convert(input io.Reader, options models.Options) (output io.ReadCloser, err error) {
+	extension := options.Extension()
+	if extension == "" {
 		return output, ErrBadFormat
 	}
 	path := filepath.Join(os.TempDir(), fmt.Sprintf("%s.%s", randStr(fileNameLength), extension))

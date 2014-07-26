@@ -5,18 +5,23 @@ import (
 	"strings"
 )
 
+var (
+	extensions = map[string]string{"h264": "mp4", "libvpx": "webm", "libvorbis": "ogg", "aac": "aac"}
+)
+
 type Options interface {
 	String() string
-	GetFormat() string
+	Mime() string
+	Extension() string
 }
 
 type Request struct {
-	Id          string      `json:"id"`
-	File        string      `json:"file"`
-	Type        string      `json:"type"`
-	ProgressKey string      `json:"progress_key"`
-	ResultKey   string      `json:"result_key"`
-	Options     interface{} `json:"options"`
+	Id          string  `json:"id"`
+	File        string  `json:"file"`
+	Type        string  `json:"type"`
+	ProgressKey string  `json:"progress_key"`
+	ResultKey   string  `json:"result_key"`
+	Options     Options `json:"options"`
 }
 
 type Responce struct {
@@ -48,8 +53,10 @@ type AudioOptions struct {
 	End      int    `json:"end"`
 	Duration int    `json:"duration"`
 	Format   string `json:"format"`
+	Bitrate  int    `json:"birtate"`
+}
 
-	Bitrate int `json:"birtate"`
+type PictureOptions struct {
 }
 
 func fixAAC(params []string) []string {
@@ -90,6 +97,22 @@ func (v *VideoOptions) GetFormat() string {
 	return v.Video.Format
 }
 
+func (v *VideoOptions) Extension() string {
+	return extensions[v.Video.Format]
+}
+
+func (v *VideoOptions) Mime() string {
+	return fmt.Sprintf("video/%s", v.Extension())
+}
+
+func (a *AudioOptions) Extension() string {
+	return extensions[a.Format]
+}
+
+func (a *AudioOptions) Mime() string {
+	return fmt.Sprintf("audio/%s", a.Extension())
+}
+
 func (a *AudioOptions) String() string {
 	var params []string
 
@@ -114,8 +137,4 @@ func (a *AudioOptions) String() string {
 	params = append(params, "-vn")
 
 	return strings.Join(params, " ")
-}
-
-func (a *AudioOptions) GetFormat() string {
-	return a.Format
 }
