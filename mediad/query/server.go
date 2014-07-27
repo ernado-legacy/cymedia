@@ -28,6 +28,17 @@ func NewTestServer() (QueryServer, Query) {
 	return s, s.query
 }
 
+func NewRedisServer(weedUrl, redisHost, redisKey string) (server QueryServer, err error) {
+	s := new(Server)
+	s.weed = weedo.NewClient(weedUrl)
+	s.query, err = NewRedisQuery(redisHost, redisKey)
+	if err != nil {
+		return
+	}
+	s.video = new(conventer.VideoConventer)
+	return s, nil
+}
+
 func (s *Server) Convert(req models.Request) (output io.ReadCloser, err error) {
 	url, _, err := s.weed.GetUrl(req.File)
 	if err != nil {
