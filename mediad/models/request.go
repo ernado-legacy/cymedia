@@ -25,9 +25,11 @@ type Request struct {
 }
 
 type Responce struct {
-	Id     string `json:"id"`
-	File   string `json:"file"`
-	Format string `json:"format"`
+	Id      string `json:"id"`
+	File    string `json:"file,omitempty"`
+	Format  string `json:"format,omitempty"`
+	Success bool   `json:"success"`
+	Error   string `json:"error,omitempty"`
 }
 
 type VideoOptions struct {
