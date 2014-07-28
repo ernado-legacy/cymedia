@@ -17,7 +17,6 @@ func randStr(length int) string {
 
 func TestQuery(t *testing.T) {
 	Convey("Memory query", t, func() {
-
 		q := NewMemoryQuery()
 		request := models.Request{}
 		request.Id = "request"
@@ -27,7 +26,6 @@ func TestQuery(t *testing.T) {
 		So(err, ShouldBeNil)
 		So(r.Id, ShouldEqual, request.Id)
 	})
-
 	Convey("Redis query", t, func() {
 		q, err := NewRedisQuery(":6379", fmt.Sprintf("test:cymedia:%s", randStr(20)))
 		So(err, ShouldBeNil)

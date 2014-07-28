@@ -10,19 +10,26 @@ type QueryClient interface {
 	Push(fid, requestType string, options models.Options) error
 }
 
-type TestClient struct {
+type Client struct {
 	query Query
 	weed  *weedo.Client
 }
 
-func NewTestClient(query Query) *TestClient {
-	c := &TestClient{}
+func NewTestClient(query Query) *Client {
+	c := new(Client)
 	c.weed = weedo.NewClient("http://localhost:9333")
 	c.query = query
 	return c
 }
 
-func (t *TestClient) Push(fid, requestType string, options models.Options) error {
+func NewRedisClient(weedUrl, redisHost, redisKey string) (client QueryClient, err error) {
+	c := new(Client)
+	c.weed = weedo.NewClient(weedUrl)
+	c.query, err = NewRedisQuery(redisHost, redisKey)
+	return c, err
+}
+
+func (t *Client) Push(fid, requestType string, options models.Options) error {
 	req := models.Request{}
 	req.Id = fid + requestType
 	req.Type = requestType
@@ -31,16 +38,14 @@ func (t *TestClient) Push(fid, requestType string, options models.Options) error
 	return t.query.Push(req)
 }
 
-func (t *TestClient) TestPush(filename, requestType string, options models.Options) error {
+func (t *Client) FilePush(filename, requestType string, options models.Options) error {
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
-
 	fid, _, err := t.weed.AssignUpload(filename, "file", f)
 	if err != nil {
 		return err
 	}
-
 	return t.Push(fid, requestType, options)
 }

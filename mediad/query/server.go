@@ -1,12 +1,15 @@
 package query
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/ernado/cymedia/mediad/conventer"
 	"github.com/ernado/cymedia/mediad/models"
+	"github.com/garyburd/redigo/redis"
 	"github.com/ginuerzh/weedo"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -15,9 +18,24 @@ var (
 )
 
 type Server struct {
+	conn  *redis.Conn
 	weed  *weedo.Client
 	video conventer.Conventer
 	query Query
+}
+
+func (s *Server) MakeResponce(request models.Request) error {
+	responce, err := s.Process(request)
+	if err != nil {
+		responce = models.Responce{Id: request.Id, Success: false, Error: err.Error()}
+	}
+
+	data, err := json.Marshal(responce)
+	if err != nil {
+		return err
+	}
+	_, err = s.conn.Do("LPUSH", request.ResultKey, data)
+	return err
 }
 
 func NewTestServer() (QueryServer, Query) {
@@ -31,12 +49,9 @@ func NewTestServer() (QueryServer, Query) {
 func NewRedisServer(weedUrl, redisHost, redisKey string) (server QueryServer, err error) {
 	s := new(Server)
 	s.weed = weedo.NewClient(weedUrl)
-	s.query, err = NewRedisQuery(redisHost, redisKey)
-	if err != nil {
-		return
-	}
 	s.video = new(conventer.VideoConventer)
-	return s, nil
+	s.query, err = NewRedisQuery(redisHost, redisKey)
+	return s, err
 }
 
 func (s *Server) Convert(req models.Request) (output io.ReadCloser, err error) {
