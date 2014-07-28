@@ -11,6 +11,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 var (
@@ -18,7 +19,7 @@ var (
 )
 
 type Server struct {
-	conn  *redis.Conn
+	conn  redis.Conn
 	weed  *weedo.Client
 	video conventer.Conventer
 	query Query
@@ -36,6 +37,33 @@ func (s *Server) MakeResponce(request models.Request) error {
 	}
 	_, err = s.conn.Do("LPUSH", request.ResultKey, data)
 	return err
+}
+
+func (s *Server) Iteration() error {
+	request, err := s.query.Pull()
+	log.Println("got request", request.Id)
+	if err != nil {
+		return err
+	}
+	return s.MakeResponce(request)
+}
+
+func (s *Server) Main() {
+	var err error
+	var sleep time.Duration
+	log.Println("started")
+	for {
+		if err = s.Iteration(); err != nil {
+			if sleep == time.Second*0 {
+				sleep = time.Second * 1
+			}
+			sleep = sleep * 2
+			log.Println(err, "sleeping for", sleep)
+		} else {
+			sleep = time.Second * 0
+		}
+		time.Sleep(sleep)
+	}
 }
 
 func NewTestServer() (QueryServer, Query) {

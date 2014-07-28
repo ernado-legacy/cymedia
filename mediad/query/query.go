@@ -13,6 +13,7 @@ type Query interface {
 
 type QueryServer interface {
 	Process(request models.Request) (models.Responce, error)
+	Main()
 }
 
 type MemoryQuery struct {
