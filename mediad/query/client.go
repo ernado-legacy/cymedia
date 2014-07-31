@@ -7,12 +7,13 @@ import (
 )
 
 type QueryClient interface {
-	Push(fid, requestType string, options models.Options) error
+	Push(id, fid, requestType string, options models.Options) error
 }
 
 type Client struct {
-	query Query
-	weed  *weedo.Client
+	resultKey string
+	query     Query
+	weed      *weedo.Client
 }
 
 func NewTestClient(query Query) *Client {
@@ -22,19 +23,21 @@ func NewTestClient(query Query) *Client {
 	return c
 }
 
-func NewRedisClient(weedUrl, redisHost, redisKey string) (client QueryClient, err error) {
+func NewRedisClient(weedUrl, redisHost, redisKey, resultKey string) (client QueryClient, err error) {
 	c := new(Client)
 	c.weed = weedo.NewClient(weedUrl)
 	c.query, err = NewRedisQuery(redisHost, redisKey)
+	c.resultKey = resultKey
 	return c, err
 }
 
-func (t *Client) Push(fid, requestType string, options models.Options) error {
+func (t *Client) Push(id, fid, requestType string, options models.Options) error {
 	req := models.Request{}
-	req.Id = fid + requestType
+	req.Id = id
 	req.Type = requestType
 	req.Options = options
 	req.File = fid
+	req.ResultKey = t.resultKey
 	return t.query.Push(req)
 }
 
@@ -47,5 +50,5 @@ func (t *Client) FilePush(filename, requestType string, options models.Options) 
 	if err != nil {
 		return err
 	}
-	return t.Push(fid, requestType, options)
+	return t.Push(fid, fid, requestType, options)
 }

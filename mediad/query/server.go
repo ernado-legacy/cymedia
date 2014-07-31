@@ -11,11 +11,14 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"runtime/debug"
 	"time"
 )
 
 var (
-	ErrorBadType = errors.New("bad type")
+	ErrorBadType  = errors.New("bad type")
+	ErrorBadKey   = errors.New("bad key")
+	ErrorCritical = errors.New("critical error")
 )
 
 type Server struct {
@@ -25,15 +28,30 @@ type Server struct {
 	query Query
 }
 
-func (s *Server) MakeResponce(request models.Request) error {
+func (s *Server) MakeResponce(request models.Request) (err error) {
+	defer func() {
+		rec := recover()
+		if rec != nil {
+			log.Println(rec)
+			err = ErrorCritical
+			debug.PrintStack()
+		}
+	}()
+	log.Println("making responce")
 	responce, err := s.Process(request)
+	log.Println("responce generated", responce, err)
 	if err != nil {
 		responce = models.Responce{Id: request.Id, Success: false, Error: err.Error()}
 	}
 
+	log.Println("marshaling")
 	data, err := json.Marshal(responce)
 	if err != nil {
 		return err
+	}
+	log.Println("pushing", string(data))
+	if request.ResultKey == "" {
+		return ErrorBadKey
 	}
 	_, err = s.conn.Do("LPUSH", request.ResultKey, data)
 	return err
@@ -42,7 +60,9 @@ func (s *Server) MakeResponce(request models.Request) error {
 func (s *Server) Iteration() error {
 	request, err := s.query.Pull()
 	log.Println("got request", request.Id)
+	log.Printf("%+v\n", request)
 	if err != nil {
+		log.Println("error processing request", err)
 		return err
 	}
 	return s.MakeResponce(request)
@@ -79,6 +99,7 @@ func NewRedisServer(weedUrl, redisHost, redisKey string) (server QueryServer, er
 	s.weed = weedo.NewClient(weedUrl)
 	s.video = new(conventer.VideoConventer)
 	s.query, err = NewRedisQuery(redisHost, redisKey)
+	s.conn, err = redis.Dial("tcp", redisHost)
 	return s, err
 }
 
@@ -91,25 +112,37 @@ func (s *Server) Convert(req models.Request) (output io.ReadCloser, err error) {
 	if err != nil {
 		return
 	}
+	log.Println("getting options")
+	options := req.GetOptions()
+	if options == nil {
+		err = ErrorBadType
+		return
+	}
+	log.Println("converting")
 	if req.Type == "video" {
-		return s.video.Convert(resp.Body, req.Options)
+		return s.video.Convert(resp.Body, options)
+	}
+	if req.Type == "audio" {
+		return s.video.Convert(resp.Body, options)
 	}
 	return output, ErrorBadType
 }
 
 func (s *Server) Process(request models.Request) (response models.Responce, err error) {
+	log.Println("processing")
+	options := request.GetOptions()
+	response.Id = request.Id
+	response.Format = options.Extension()
+	response.Type = request.Type
 	output, err := s.Convert(request)
 	if err != nil {
 		return
 	}
-	options := request.Options
 	fid, _, err := s.weed.AssignUpload(fmt.Sprintf("file.%s", options.Extension()), options.Mime(), output)
 	if err != nil {
 		return
 	}
-	response.Id = request.Id
 	response.File = fid
-	response.Format = options.Extension()
-	response.Type = request.Type
+	response.Success = true
 	return
 }
