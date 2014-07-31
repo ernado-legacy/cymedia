@@ -27,6 +27,7 @@ type Request struct {
 type Responce struct {
 	Id      string `json:"id"`
 	File    string `json:"file,omitempty"`
+	Type    string `json:"type"`
 	Format  string `json:"format,omitempty"`
 	Success bool   `json:"success"`
 	Error   string `json:"error,omitempty"`

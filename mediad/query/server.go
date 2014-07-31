@@ -110,5 +110,6 @@ func (s *Server) Process(request models.Request) (response models.Responce, err 
 	response.Id = request.Id
 	response.File = fid
 	response.Format = options.Extension()
+	response.Type = request.Type
 	return
 }
