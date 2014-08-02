@@ -1,11 +1,32 @@
 package models
 
 import (
+	"encoding/json"
 	. "github.com/smartystreets/goconvey/convey"
+	"log"
 	"testing"
 )
 
 func TestVideoParams(t *testing.T) {
+	Convey("JSON", t, func() {
+		Convey("Responce", func() {
+			p := new(AudioOptions)
+			p.Format = "aac"
+			p.Bitrate = 1024 * 128
+			r := new(Request)
+			r.Options = p
+			r.Type = "audio"
+			data, err := json.Marshal(r)
+			log.Println(string(data))
+			So(err, ShouldBeNil)
+			ro := new(Request)
+			So(json.Unmarshal(data, ro), ShouldBeNil)
+			Convey("Interface Convert", func() {
+				options := ro.GetOptions()
+				So(options, ShouldNotBeNil)
+			})
+		})
+	})
 	Convey("Audio options", t, func() {
 		Convey("Simple", func() {
 			p := new(AudioOptions)

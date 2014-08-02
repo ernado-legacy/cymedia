@@ -36,7 +36,7 @@ func TestServer(t *testing.T) {
 		o.Audio.Format = "libvorbis"
 		o.Audio.Bitrate = 128 * 1024
 		o.Video.Bitrate = 500 * 1024
-		err := client.TestPush(filename, "video", o)
+		err := client.FilePush(filename, "video", o)
 		So(err, ShouldBeNil)
 		Convey("Convert", func() {
 			req, err := query.Pull()

@@ -11,8 +11,13 @@ type Query interface {
 	Push(request models.Request) error
 }
 
+type ResponceQuery interface {
+	Pull() (models.Responce, error)
+}
+
 type QueryServer interface {
 	Process(request models.Request) (models.Responce, error)
+	Main()
 }
 
 type MemoryQuery struct {
@@ -20,6 +25,11 @@ type MemoryQuery struct {
 }
 
 type RedisQuery struct {
+	conn redis.Conn
+	key  string
+}
+
+type RedisResponceQuery struct {
 	conn redis.Conn
 	key  string
 }
@@ -50,6 +60,14 @@ func (r *RedisQuery) Push(request models.Request) error {
 	return err
 }
 
+func (r *RedisResponceQuery) Pull() (res models.Responce, err error) {
+	reply, err := redis.Strings(r.conn.Do("BLPOP", r.key, 0))
+	if err != nil {
+		return
+	}
+	return res, json.Unmarshal([]byte(reply[1]), &res)
+}
+
 func NewMemoryQuery() Query {
 	q := new(MemoryQuery)
 	q.requests = make(chan models.Request, 10)
@@ -62,6 +80,17 @@ func NewRedisQuery(host, key string) (Query, error) {
 		return nil, err
 	}
 	q := new(RedisQuery)
+	q.key = key
+	q.conn = conn
+	return q, nil
+}
+
+func NewRedisResponceQuery(host, key string) (ResponceQuery, error) {
+	conn, err := redis.Dial("tcp", host)
+	if err != nil {
+		return nil, err
+	}
+	q := new(RedisResponceQuery)
 	q.key = key
 	q.conn = conn
 	return q, nil

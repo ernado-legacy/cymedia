@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -17,17 +18,39 @@ type Options interface {
 }
 
 type Request struct {
-	Id          string  `json:"id"`
-	File        string  `json:"file"`
-	Type        string  `json:"type"`
-	ProgressKey string  `json:"progress_key"`
-	ResultKey   string  `json:"result_key"`
-	Options     Options `json:"options"`
+	Id          string      `json:"id"`
+	File        string      `json:"file"`
+	Type        string      `json:"type"`
+	ProgressKey string      `json:"progress_key"`
+	ResultKey   string      `json:"result_key"`
+	Options     interface{} `json:"options"`
+}
+
+func convert(input interface{}, output interface{}) error {
+	data, err := json.Marshal(input)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, output)
+}
+func (r *Request) GetOptions() (options Options) {
+	if r.Type == "video" {
+		o := new(VideoOptions)
+		convert(r.Options, o)
+		options = o
+	}
+	if r.Type == "audio" {
+		o := new(AudioOptions)
+		convert(r.Options, o)
+		options = o
+	}
+	return
 }
 
 type Responce struct {
 	Id      string `json:"id"`
 	File    string `json:"file,omitempty"`
+	Type    string `json:"type"`
 	Format  string `json:"format,omitempty"`
 	Success bool   `json:"success"`
 	Error   string `json:"error,omitempty"`
