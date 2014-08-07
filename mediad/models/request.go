@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	extensions = map[string]string{"h264": "mp4", "libvpx": "webm", "libvorbis": "ogg", "aac": "aac"}
+	extensions = map[string]string{"h264": "mp4", "libvpx": "webm",
+		"libvorbis": "ogg", "aac": "aac", "jpg": "jpg", "png": "png"}
 )
 
 type Options interface {
@@ -82,6 +83,11 @@ type AudioOptions struct {
 }
 
 type PictureOptions struct {
+	Format    string `json:"format"`
+	Thumbnail bool   `json:"thumbnail"`
+	Width     int    `json:"width,omitempty"`
+	Heigth    int    `json:"heigth,omitempty"`
+	Quality   int    `json:"quality,omitempty"`
 }
 
 func fixAAC(params []string) []string {
@@ -162,4 +168,16 @@ func (a *AudioOptions) String() string {
 	params = append(params, "-vn")
 
 	return strings.Join(params, " ")
+}
+
+func (p *PictureOptions) Mime() string {
+	return fmt.Sprintf("image/%s", p.Extension())
+}
+
+func (p *PictureOptions) Extension() string {
+	return p.Format
+}
+
+func (p *PictureOptions) String() string {
+	return fmt.Sprintf("%+v", *p)
 }

@@ -87,10 +87,10 @@ func (s *Server) Main() {
 }
 
 func NewTestServer() (QueryServer, Query) {
-	s := &Server{}
+	s := new(Server)
 	s.weed = weedo.NewClient("http://localhost:9333")
 	s.query = NewMemoryQuery()
-	s.video = &conventer.VideoConventer{}
+	s.video = new(conventer.VideoConventer)
 	return s, s.query
 }
 
