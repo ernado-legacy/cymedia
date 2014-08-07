@@ -1,0 +1,15 @@
+FROM cydev/media
+
+ENV ROOT /go/src/github.com/ernado/cymedia
+RUN mkdir -p $ROOT
+# initial download
+RUN git clone git@github.com:ernado/cymedia.git $ROOT
+RUN cd $ROOT && git pull # 18.07.2014 
+RUN cd $ROOT && go get .
+
+# update
+RUN cd $ROOT && version=VERSION git pull
+RUN cd $ROOT && go get -u -v ./...
+RUN cd $ROOT && go install -v ./mediad
+
+ENTRYPOINT ["/go/bin/poputchiki"]
