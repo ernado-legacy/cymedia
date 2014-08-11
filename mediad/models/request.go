@@ -17,6 +17,12 @@ type Options interface {
 	Extension() string
 }
 
+const (
+	VideoType     = "video"
+	AudioType     = "audio"
+	ThumbnailType = "thumbnail"
+)
+
 type Request struct {
 	Id          string      `json:"id"`
 	File        string      `json:"file"`
@@ -34,13 +40,18 @@ func convert(input interface{}, output interface{}) error {
 	return json.Unmarshal(data, output)
 }
 func (r *Request) GetOptions() (options Options) {
-	if r.Type == "video" {
+	if r.Type == VideoType {
 		o := new(VideoOptions)
 		convert(r.Options, o)
 		options = o
 	}
-	if r.Type == "audio" {
+	if r.Type == AudioType {
 		o := new(AudioOptions)
+		convert(r.Options, o)
+		options = o
+	}
+	if r.Type == ThumbnailType {
+		o := new(ThumbnailOptions)
 		convert(r.Options, o)
 		options = o
 	}
@@ -88,6 +99,11 @@ type PictureOptions struct {
 	Width     int    `json:"width,omitempty"`
 	Heigth    int    `json:"heigth,omitempty"`
 	Quality   int    `json:"quality,omitempty"`
+}
+
+type ThumbnailOptions struct {
+	Format string `json:"format"`
+	Time   int    `json:"time"`
 }
 
 func fixAAC(params []string) []string {
@@ -180,4 +196,21 @@ func (p *PictureOptions) Extension() string {
 
 func (p *PictureOptions) String() string {
 	return fmt.Sprintf("%+v", *p)
+}
+
+func (t *ThumbnailOptions) String() string {
+	var params []string
+	if t.Time != 0 {
+		params = append(params, fmt.Sprintf("-ss %d", t.Time))
+	}
+	params = append(params, "-vframes 1")
+	return strings.Join(params, " ")
+}
+
+func (t *ThumbnailOptions) Mime() string {
+	return fmt.Sprintf("image/%s", t.Extension())
+}
+
+func (t *ThumbnailOptions) Extension() string {
+	return t.Format
 }

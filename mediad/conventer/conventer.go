@@ -1,12 +1,14 @@
 package conventer
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/ernado/cymedia/mediad/models"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -37,8 +39,12 @@ func (c *VideoConventer) Convert(input io.Reader, options models.Options) (outpu
 	}
 	path := filepath.Join(os.TempDir(), fmt.Sprintf("%s.%s", randStr(fileNameLength), extension))
 	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("ffmpeg -i - %s %s", options, path))
+	buffer := new(bytes.Buffer)
 	cmd.Stdin = input
+	cmd.Stderr = buffer
 	if err = cmd.Run(); err != nil {
+		log.Println(cmd.Args)
+		log.Println(buffer.String())
 		return
 	}
 	return os.Open(path)

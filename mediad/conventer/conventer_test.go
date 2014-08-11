@@ -76,6 +76,35 @@ func TestVideoConvertation(t *testing.T) {
 			So(err, ShouldBeNil)
 		})
 	})
+
+	Convey("Thumbnail", t, func() {
+		filename := "samples/sample.webm"
+		Convey("start", func() {
+			f, err := os.Open(filename)
+			So(err, ShouldBeNil)
+			So(f, ShouldNotBeNil)
+			defer f.Close()
+
+			c := VideoConventer{}
+			o := new(models.ThumbnailOptions)
+			o.Format = "png"
+			_, err = c.Convert(f, o)
+			So(err, ShouldBeNil)
+		})
+		Convey("5s", func() {
+			f, err := os.Open(filename)
+			So(err, ShouldBeNil)
+			So(f, ShouldNotBeNil)
+			defer f.Close()
+
+			c := VideoConventer{}
+			o := new(models.ThumbnailOptions)
+			o.Format = "png"
+			o.Time = 5
+			_, err = c.Convert(f, o)
+			So(err, ShouldBeNil)
+		})
+	})
 	Convey("Audio", t, func() {
 		filename := "samples/sample.ogg"
 		Convey("aac", func() {

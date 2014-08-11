@@ -119,10 +119,13 @@ func (s *Server) Convert(req models.Request) (output io.ReadCloser, err error) {
 		return
 	}
 	log.Println("converting")
-	if req.Type == "video" {
+	if req.Type == models.VideoType {
 		return s.video.Convert(resp.Body, options)
 	}
-	if req.Type == "audio" {
+	if req.Type == models.AudioType {
+		return s.video.Convert(resp.Body, options)
+	}
+	if req.Type == models.ThumbnailType {
 		return s.video.Convert(resp.Body, options)
 	}
 	return output, ErrorBadType
