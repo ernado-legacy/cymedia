@@ -43,6 +43,11 @@ func (c *VideoConventer) Convert(input io.Reader, options models.Options) (outpu
 	cmd.Stdin = input
 	cmd.Stderr = buffer
 	if err = cmd.Run(); err != nil {
+		if err.Error() == "write |1: broken pipe" {
+			log.Println("ignoring broken pipe")
+			return os.Open(path)
+		}
+		log.Println(err)
 		log.Println(cmd.Args)
 		log.Println(buffer.String())
 		return
