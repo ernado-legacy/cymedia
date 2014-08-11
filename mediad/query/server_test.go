@@ -27,7 +27,7 @@ func isFileOK(res models.Responce) error {
 }
 
 func TestServer(t *testing.T) {
-	Convey("Upload", t, func() {
+	Convey("Convert upload", t, func() {
 		server, query := NewTestServer()
 		client := NewTestClient(query)
 		filename := "../conventer/samples/sample.webm"
@@ -36,7 +36,24 @@ func TestServer(t *testing.T) {
 		o.Audio.Format = "libvorbis"
 		o.Audio.Bitrate = 128 * 1024
 		o.Video.Bitrate = 500 * 1024
+		o.Duration = 1
 		err := client.FilePush(filename, "video", o)
+		So(err, ShouldBeNil)
+		Convey("Convert", func() {
+			req, err := query.Pull()
+			So(err, ShouldBeNil)
+			res, err := server.Process(req)
+			So(err, ShouldBeNil)
+			So(isFileOK(res), ShouldBeNil)
+		})
+	})
+	Convey("Thumbnail upload", t, func() {
+		server, query := NewTestServer()
+		client := NewTestClient(query)
+		filename := "../conventer/samples/sample.webm"
+		o := new(models.ThumbnailOptions)
+		o.Format = "png"
+		err := client.FilePush(filename, "thumbnail", o)
 		So(err, ShouldBeNil)
 		Convey("Convert", func() {
 			req, err := query.Pull()

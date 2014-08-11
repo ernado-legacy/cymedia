@@ -57,6 +57,7 @@ func TestVideoConvertation(t *testing.T) {
 			o.Audio.Format = "aac"
 			o.Audio.Bitrate = 128 * 1024
 			o.Video.Bitrate = 500 * 1024
+			o.Duration = 1
 			_, err = c.Convert(f, o)
 			So(err, ShouldBeNil)
 		})
@@ -72,6 +73,7 @@ func TestVideoConvertation(t *testing.T) {
 			o.Audio.Format = "libvorbis"
 			o.Audio.Bitrate = 128 * 1024
 			o.Video.Bitrate = 500 * 1024
+			o.Duration = 1
 			_, err = c.Convert(f, o)
 			So(err, ShouldBeNil)
 		})
