@@ -38,7 +38,32 @@ func (c *VideoConventer) Convert(input io.Reader, options models.Options) (outpu
 		return output, ErrBadFormat
 	}
 	path := filepath.Join(os.TempDir(), fmt.Sprintf("%s.%s", randStr(fileNameLength), extension))
-	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("ffmpeg -i - %s %s", options, path))
+	tempfile := filepath.Join(os.TempDir(), randStr(fileNameLength))
+	f, err := os.Create(tempfile)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	// make a buffer to keep chunks that are read
+	buf := make([]byte, 1024)
+	for {
+		// read a chunk
+		n, err := input.Read(buf)
+		if err != nil && err != io.EOF {
+			log.Println(err)
+			return output, err
+		}
+		if n == 0 {
+			break
+		}
+
+		// write a chunk
+		if _, err := f.Write(buf[:n]); err != nil {
+			log.Println(err)
+			return output, err
+		}
+	}
+	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("ffmpeg -i %s %s %s", tempfile, options, path))
 	buffer := new(bytes.Buffer)
 	cmd.Stdin = input
 	cmd.Stderr = buffer

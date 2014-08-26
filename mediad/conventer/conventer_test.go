@@ -79,6 +79,42 @@ func TestVideoConvertation(t *testing.T) {
 		})
 	})
 
+	Convey("MOV", t, func() {
+		filename := "samples/sample.mov"
+		Convey("mp4", func() {
+			f, err := os.Open(filename)
+			So(err, ShouldBeNil)
+			So(f, ShouldNotBeNil)
+			defer f.Close()
+
+			c := VideoConventer{}
+			o := new(models.VideoOptions)
+			o.Video.Format = "h264"
+			o.Audio.Format = "aac"
+			o.Audio.Bitrate = 128 * 1024
+			o.Video.Bitrate = 500 * 1024
+			o.Duration = 1
+			_, err = c.Convert(f, o)
+			So(err, ShouldBeNil)
+		})
+		Convey("webm", func() {
+			f, err := os.Open(filename)
+			So(err, ShouldBeNil)
+			So(f, ShouldNotBeNil)
+			defer f.Close()
+
+			c := VideoConventer{}
+			o := new(models.VideoOptions)
+			o.Video.Format = "libvpx"
+			o.Audio.Format = "libvorbis"
+			o.Audio.Bitrate = 128 * 1024
+			o.Video.Bitrate = 500 * 1024
+			o.Duration = 1
+			_, err = c.Convert(f, o)
+			So(err, ShouldBeNil)
+		})
+	})
+
 	Convey("Thumbnail", t, func() {
 		filename := "samples/sample.webm"
 		Convey("start", func() {
