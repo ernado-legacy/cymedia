@@ -41,7 +41,7 @@ func (s *Server) MakeResponce(request models.Request) (err error) {
 	responce, err := s.Process(request)
 	log.Println("responce generated", responce, err)
 	if err != nil {
-		responce = models.Responce{Id: request.Id, Success: false, Error: err.Error()}
+		responce = models.Responce{Id: request.Id, Success: false, Error: err.Error(), Type: request.Type}
 	}
 
 	log.Println("marshaling")
