@@ -8,7 +8,7 @@ import (
 
 var (
 	extensions = map[string]string{"h264": "mp4", "libvpx": "webm",
-		"libvorbis": "ogg", "aac": "aac", "jpg": "jpg", "png": "png"}
+		"libvorbis": "ogg", "aac": "m4a", "jpg": "jpg", "png": "png"}
 )
 
 type Options interface {
