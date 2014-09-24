@@ -94,6 +94,10 @@ func TestVideoConvertation(t *testing.T) {
 			o.Audio.Bitrate = 128 * 1024
 			o.Video.Bitrate = 500 * 1024
 			o.Duration = 1
+			probe, err := c.Probe(filename)
+			So(err, ShouldBeNil)
+			So(probe, ShouldNotBeNil)
+			So(o.Process(probe), ShouldBeNil)
 			_, err = c.Convert(f, o)
 			So(err, ShouldBeNil)
 		})
@@ -110,8 +114,25 @@ func TestVideoConvertation(t *testing.T) {
 			o.Audio.Bitrate = 128 * 1024
 			o.Video.Bitrate = 500 * 1024
 			o.Duration = 1
+			probe, err := c.Probe(filename)
+			So(err, ShouldBeNil)
+			So(probe, ShouldNotBeNil)
+			So(o.Process(probe), ShouldBeNil)
 			_, err = c.Convert(f, o)
 			So(err, ShouldBeNil)
+		})
+		Convey("Probe", func() {
+			f, err := os.Open(filename)
+			So(err, ShouldBeNil)
+			So(f, ShouldNotBeNil)
+			defer f.Close()
+			c := VideoConventer{}
+			probe, err := c.Probe(filename)
+			So(err, ShouldBeNil)
+			So(probe, ShouldNotBeNil)
+			video := probe.Stream("video")
+			So(video, ShouldNotBeNil)
+			So(video.Tag("rotate"), ShouldEqual, "90")
 		})
 	})
 

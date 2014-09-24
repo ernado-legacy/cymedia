@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/ernado/cymedia/mediad/models"
@@ -30,6 +31,27 @@ func randStr(length int) string {
 	b := make([]byte, length)
 	rand.Read(b)
 	return hex.EncodeToString(b)
+}
+
+func (c *VideoConventer) Probe(filename string) (*models.Probe, error) {
+	probe := new(models.Probe)
+	params := "-v quiet -print_format json -show_format -show_streams"
+	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("ffprobe %s %s", params, filename))
+	buffer := new(bytes.Buffer)
+	errBuffer := new(bytes.Buffer)
+	cmd.Stdout = buffer
+	cmd.Stderr = errBuffer
+	if err := cmd.Run(); err != nil {
+		log.Println(err)
+		log.Println(cmd.Args)
+		log.Println(buffer.String())
+		return nil, err
+	}
+	decoder := json.NewDecoder(buffer)
+	if err := decoder.Decode(probe); err != nil {
+		return nil, err
+	}
+	return probe, nil
 }
 
 func (c *VideoConventer) Convert(input io.Reader, options models.Options) (output io.ReadCloser, err error) {
@@ -63,7 +85,16 @@ func (c *VideoConventer) Convert(input io.Reader, options models.Options) (outpu
 			return output, err
 		}
 	}
-	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("ffmpeg -i %s %s %s", tempfile, options, path))
+	probe, err := c.Probe(tempfile)
+	if err != nil {
+		return output, err
+	}
+	if err := options.Process(probe); err != nil {
+		return output, err
+	}
+	command := fmt.Sprintf("ffmpeg -i %s %s %s", tempfile, options, path)
+	log.Println(command)
+	cmd := exec.Command("/bin/bash", "-c", command)
 	buffer := new(bytes.Buffer)
 	cmd.Stdin = input
 	cmd.Stderr = buffer

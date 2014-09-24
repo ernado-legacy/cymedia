@@ -15,12 +15,14 @@ type Options interface {
 	String() string
 	Mime() string
 	Extension() string
+	Process(probe *Probe) error
 }
 
 const (
 	VideoType     = "video"
 	AudioType     = "audio"
 	ThumbnailType = "thumbnail"
+	transposeFlag = "transpose=1"
 )
 
 type Request struct {
@@ -68,9 +70,10 @@ type Responce struct {
 }
 
 type VideoOptions struct {
-	Start    int `json:"start"`
-	End      int `json:"end"`
-	Duration int `json:"duration"`
+	Start    int  `json:"start"`
+	End      int  `json:"end"`
+	Duration int  `json:"duration"`
+	Rotated  bool `json:"rotated,omitempty"`
 	Video    struct {
 		Width   int    `json:"width"`
 		Height  int    `json:"height"`
@@ -102,13 +105,40 @@ type PictureOptions struct {
 }
 
 type ThumbnailOptions struct {
-	Format string `json:"format"`
-	Time   int    `json:"time"`
+	Format  string `json:"format"`
+	Rotated bool   `json:"rotated,omitempty"`
+	Time    int    `json:"time"`
 }
 
 func fixAAC(params []string) []string {
 	params = append(params, "-strict")
 	return append(params, "-2")
+}
+
+func (v *VideoOptions) Process(probe *Probe) error {
+	video := probe.Stream("video")
+	if video != nil {
+		rotation := video.Tag("rotate")
+		if rotation == "90" {
+			v.Rotated = true
+		}
+	}
+	return nil
+}
+
+func (t *ThumbnailOptions) Process(probe *Probe) error {
+	video := probe.Stream("video")
+	if video != nil {
+		rotation := video.Tag("rotate")
+		if rotation == "90" {
+			t.Rotated = true
+		}
+	}
+	return nil
+}
+
+func (a *AudioOptions) Process(probe *Probe) error {
+	return nil
 }
 
 func (v *VideoOptions) String() string {
@@ -134,7 +164,13 @@ func (v *VideoOptions) String() string {
 		params = append(params, fmt.Sprintf("-t %d", v.Duration))
 	}
 	if v.Video.Square {
-		params = append(params, fmt.Sprintf("-vf crop=ih:ih,scale=%d:%d", v.Video.Width, v.Video.Height))
+		param := fmt.Sprintf("-vf crop=ih:ih,scale=%d:%d", v.Video.Width, v.Video.Height)
+		if v.Rotated {
+			param = fmt.Sprintf("-vf crop=ih:ih,scale=%d:%d,%s", v.Video.Width, v.Video.Height, transposeFlag)
+		}
+		params = append(params, param)
+	} else if v.Rotated {
+		params = append(params, fmt.Sprintf("-vf %s", transposeFlag))
 	}
 
 	return strings.Join(params, " ")
@@ -204,6 +240,9 @@ func (t *ThumbnailOptions) String() string {
 		params = append(params, fmt.Sprintf("-ss %d", t.Time))
 	}
 	params = append(params, "-vframes 1")
+	if t.Rotated {
+		params = append(params, fmt.Sprintf("-vf %s", transposeFlag))
+	}
 	return strings.Join(params, " ")
 }
 
