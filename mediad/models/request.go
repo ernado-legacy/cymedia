@@ -173,6 +173,10 @@ func (v *VideoOptions) String() string {
 		params = append(params, fmt.Sprintf("-vf %s", transposeFlag))
 	}
 
+	if v.Rotated {
+		params = append(params, "-map_metadata -1")
+	}
+
 	return strings.Join(params, " ")
 }
 
@@ -242,6 +246,7 @@ func (t *ThumbnailOptions) String() string {
 	params = append(params, "-vframes 1")
 	if t.Rotated {
 		params = append(params, fmt.Sprintf("-vf %s", transposeFlag))
+		params = append(params, "-map_metadata -1")
 	}
 	return strings.Join(params, " ")
 }
