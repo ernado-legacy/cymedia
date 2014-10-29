@@ -7,12 +7,16 @@ import (
 import (
 	"errors"
 	"github.com/ernado/cymedia"
-	"github.com/ernado/weed"
 	"github.com/rainycape/magick"
 	"log"
 	"sync"
 	"time"
 )
+
+type StorageAdapter interface {
+	GetUrl(fid string) (url string, err error)
+	Upload(reader io.Reader, t, format string) (fid string, purl string, size int64, err error)
+}
 
 const (
 	WEBP        = "webp"
@@ -38,12 +42,12 @@ type Photo struct {
 }
 
 type Uploader struct {
-	adapter       *weed.Adapter
+	adapter       StorageAdapter
 	maxSize       int
 	thumbnailSize int
 }
 
-func NewUploader(adapter *weed.Adapter, maxSize, thumbnailSize int) *Uploader {
+func NewUploader(adapter StorageAdapter, maxSize, thumbnailSize int) *Uploader {
 	return &Uploader{adapter, maxSize, thumbnailSize}
 }
 
