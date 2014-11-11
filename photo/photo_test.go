@@ -1,10 +1,11 @@
 package photo
 
 import (
-	"github.com/ernado/weed"
-	. "github.com/smartystreets/goconvey/convey"
 	"os"
 	"testing"
+
+	"github.com/ernado/weed"
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestPhoto(t *testing.T) {
@@ -13,17 +14,7 @@ func TestPhoto(t *testing.T) {
 		So(err, ShouldBeNil)
 		adapter := weed.NewAdapter("localhost:9333")
 		uploader := Uploader{adapter, 1000, 100}
-		progress := make(chan float32)
-		stat, err := f.Stat()
+		_, err = uploader.Upload(f)
 		So(err, ShouldBeNil)
-		var p float32
-		go func() {
-			for p = range progress {
-				continue
-			}
-		}()
-		_, err = uploader.Upload(stat.Size(), f, progress)
-		So(err, ShouldBeNil)
-		So(p, ShouldAlmostEqual, 100.0)
 	})
 }
