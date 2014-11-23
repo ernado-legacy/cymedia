@@ -60,6 +60,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		selStorage.Debug(true)
 		container := selStorage.Container(*selectelContainer)
 		server, err = query.NewRedisSelectelServer(selectelAdapter{container}, *redisHost, *redisKey)
 	} else {
