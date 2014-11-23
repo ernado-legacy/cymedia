@@ -53,7 +53,10 @@ func main() {
 	)
 	if selectel {
 		if len(*selectelKey) != 0 && len(*selectelUser) != 0 {
-			selStorage, err = storage.New(*selectelUser, *selectelKey)
+			log.Println(*selectelUser, *selectelKey)
+			selStorage = storage.NewAsync(*selectelUser, *selectelKey)
+			selStorage.Debug(true)
+			err = selStorage.Auth(*selectelUser, *selectelKey)
 		} else {
 			selStorage, err = storage.NewEnv()
 		}
