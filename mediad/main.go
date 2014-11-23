@@ -16,6 +16,8 @@ var (
 	redisKey          = flag.String("redis.key", "cymedia:query", "Redis query key")
 	selectel          bool
 	selectelContainer = flag.String("selectel.container", "", "Selectel container")
+	selectelKey       = flag.String("selectel.key", "", "Selectel key")
+	selectelUser      = flag.String("selectel.user", "", "Selectel user")
 )
 
 func init() {
@@ -50,7 +52,11 @@ func main() {
 		selStorage storage.API
 	)
 	if selectel {
-		selStorage, err = storage.NewEnv()
+		if len(*selectelKey) != 0 && len(*selectelUser) != 0 {
+			selStorage, err = storage.New(*selectelUser, *selectelKey)
+		} else {
+			selStorage, err = storage.NewEnv()
+		}
 		if err != nil {
 			log.Fatal(err)
 		}
